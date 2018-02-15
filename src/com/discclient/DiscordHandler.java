@@ -1,4 +1,4 @@
-package sample;
+package com.discclient;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;

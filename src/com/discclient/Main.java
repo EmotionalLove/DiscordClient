@@ -1,4 +1,4 @@
-package sample;
+package com.discclient;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
