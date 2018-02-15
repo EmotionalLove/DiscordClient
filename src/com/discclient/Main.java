@@ -22,6 +22,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Pane p = new Pane();
+        Scene s = new Scene(p, w, h);
         Text label = new Text("Welcome");
         label.setFont(Font.font("Segoe UI", 30));
         label.setLayoutX(w/2 - (label.getLayoutBounds().getWidth()/2));
@@ -35,26 +36,26 @@ public class Main extends Application {
         field.setPromptText("Token");
         field.setLayoutX(w/2 - field.getPrefWidth()/2);
         field.setLayoutY(h - 30);
-        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
+        s.widthProperty().addListener((observable, oldValue, newValue) -> {
             w = newValue.doubleValue();
-            System.out.println("W: " + newValue);
             // add thing that need to be reposotioned here
             label.setLayoutX(w/2 - (label.getLayoutBounds().getWidth()/2));
+            field.setLayoutX(w/2 - field.getPrefWidth()/2);
             label1.setLayoutX(w/2 - label1.getLayoutBounds().getWidth()/2);
         });
-        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
+        s.heightProperty().addListener((observable, oldValue, newValue) -> {
             h = newValue.doubleValue();
-            System.out.println("H: " + newValue);
             // add thing that need to be reposotioned here
-            //field.setLayoutY(h);
             label1.setLayoutY(h/2);
             label.setLayoutY(h/2 - 20);
+            field.setLayoutY(h - 30);
         });
         //
         //
         p.getChildren().addAll(label,field,label1);
         primaryStage.setTitle("Discord");
-        primaryStage.setScene(new Scene(p, w, h));
+        s.setRoot(p);
+        primaryStage.setScene(s);
         primaryStage.show();
     }
 
