@@ -21,7 +21,27 @@ public class Main extends Application {
     double h = 275;
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) {
+        primaryStage.setScene(setupLogin(primaryStage));
+        primaryStage.show();
+    }
+
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+
+
+
+
+
+
+
+
+
+
+    private Scene setupLogin(Stage primaryStage) {
         Pane p = new Pane();
         Scene s = new Scene(p, w, h);
         Text label = new Text("Welcome");
@@ -64,45 +84,8 @@ public class Main extends Application {
             field.setLayoutY(h - 30);
             button.setLayoutY(h - 30);
         });
-        //
-        //
         p.getChildren().addAll(label,field,label1, button);
-        primaryStage.setTitle("Discord");
         s.setRoot(p);
-        primaryStage.setScene(s);
-        primaryStage.show();
-    }
-
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    private StackPane setupLogin(Stage primaryStage) {
-        Label label = new Label("Welcome");
-        label.setScaleX(2.0);
-        label.setScaleY(2.0);
-        label.setScaleZ(2.0);
-        Label label1 = new Label("Enter your discord token to connect");
-        label1.setTranslateY(20.0d);
-        TextField field = new TextField();
-        field.setPromptText("Token");
-        field.setMaxWidth(50);
-        field.setTranslateY(h - 155d);
-        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
-            w = newValue.doubleValue();
-            System.out.println("W: " + newValue);
-            // add thing that need to be reposotioned here
-        });
-        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            h = newValue.doubleValue();
-            System.out.println("H: " + newValue);
-            // add thing that need to be reposotioned here
-            field.setTranslateY(h);
-        });
-        //
-        StackPane pane = new StackPane();
-        pane.getChildren().addAll(label, label1, field);
-        return pane;
+        return s;
     }
 }
