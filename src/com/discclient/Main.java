@@ -1,8 +1,10 @@
 package com.discclient;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
@@ -13,13 +15,15 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    double w = 325;
-    double h = 275;
+    static double w = 325;
+    static double h = 275;
     static String orignalProperty;
+    static Stage primaryStage;
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setScene(setupLogin(primaryStage));
+        Main.primaryStage = primaryStage;
+        primaryStage.setScene(setupLogin());
         primaryStage.show();
     }
 
@@ -28,17 +32,28 @@ public class Main extends Application {
         launch(args);
     }
 
+    public static Scene setupDiscord() {
+        primaryStage.hide();
+        Pane p = new Pane();
+        Scene s = new Scene(p, w, h);
+        MenuButton menu = new MenuButton("Servers");
+        menu.setPrefWidth(50);
+        MenuButton cmenu = new MenuButton("Channels");
+        //
+        s.widthProperty().addListener((observable, oldValue, newValue) -> {
+            w = newValue.doubleValue();
+            // add thing that need to be reposotioned here
+            menu.setLayoutX(w+70);
+        });
+        s.heightProperty().addListener((observable, oldValue, newValue) -> {
+            h = newValue.doubleValue();
+            // add thing that need to be reposotioned here
+            menu.setLayoutY(10);
+        });
+        return s;
+    }
 
-
-
-
-
-
-
-
-
-
-    private Scene setupLogin(Stage primaryStage) {
+    private static Scene setupLogin() {
         Pane p = new Pane();
         Scene s = new Scene(p, w, h);
         Text label = new Text("Welcome");
@@ -73,7 +88,9 @@ public class Main extends Application {
         button.setOnMouseClicked(e -> {
             try {
                 DiscordHandler.connect(field.getText());
+                System.out.println("Connecting to Discord.");
             }catch (Exception ex) {
+                System.out.println("Connection failed.");
                 field.setStyle("-fx-faint-focus-color: transparent; -fx-focus-color:rgba(255,0,0,0.7);");
                 field.requestFocus();
             }

@@ -11,9 +11,13 @@ import javax.security.auth.login.LoginException;
 
 public class DiscordHandler {
 
+    public static JDA jda = null;
+
     public static void connect(String token) throws LoginException, RateLimitedException, InterruptedException {
         JDA jda = new JDABuilder(AccountType.CLIENT).setToken(token).buildBlocking();
         jda.addEventListener(new MessageListener());
+        DiscordHandler.jda = jda;
+        Main.setupDiscord();
     }
 
 }
