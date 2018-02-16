@@ -2,16 +2,24 @@ package com.discclient;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import net.dv8tion.jda.client.entities.Friend;
+import net.dv8tion.jda.client.entities.RelationshipType;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.User;
+
+import java.util.List;
+
+import static com.discclient.DiscordHandler.jda;
 
 public class Main extends Application {
 
@@ -19,6 +27,10 @@ public class Main extends Application {
     static double h = 275;
     static String orignalProperty;
     static Stage primaryStage;
+    static Stage otherStage;
+    private static Guild currentServer;
+
+    public static TextField tokenField;
 
     @Override
     public void start(Stage primaryStage) {
@@ -34,23 +46,79 @@ public class Main extends Application {
 
     public static Scene setupDiscord() {
         primaryStage.hide();
+        w = 700;
+        h = 600;
         Pane p = new Pane();
         Scene s = new Scene(p, w, h);
         MenuButton menu = new MenuButton("Servers");
-        menu.setPrefWidth(50);
+        menu.setLayoutX(w - w + 15);
+        menu.setPrefWidth(150);
+        for (Guild g : jda.getGuilds()) {
+            MenuItem item = new MenuItem(g.getName());
+            item.setOnAction(e-> {
+                menu.setText(g.getName());
+                currentServer = g;
+            });
+            menu.getItems().add(item);
+        }
         MenuButton cmenu = new MenuButton("Channels");
+        cmenu.setLayoutX(w-w + 170);
+        cmenu.setPrefWidth(150);
+        ListView<String> listView = new ListView<>();
+        listView.setPrefWidth(650);
+        listView.setPrefHeight(500);
+        listView.setLayoutY(h/2 - (listView.getPrefWidth()/2) + 80);
+        ObservableList<String> list = FXCollections.observableArrayList();
+        for (Friend usr : jda.asClient().getFriends()) {
+            list.add(usr.getUser().getName());
+        }
+        listView.setItems(list);
         //
         s.widthProperty().addListener((observable, oldValue, newValue) -> {
             w = newValue.doubleValue();
             // add thing that need to be reposotioned here
-            menu.setLayoutX(w+70);
+            menu.setLayoutX(w - w + 15);
+            cmenu.setLayoutX(w-w +  170);
         });
         s.heightProperty().addListener((observable, oldValue, newValue) -> {
             h = newValue.doubleValue();
             // add thing that need to be reposotioned here
             menu.setLayoutY(10);
+            cmenu.setLayoutY(10);
+            //listView.setLayoutY(h/2 - (listView.getPrefWidth()/2) + 80);
+            listView.setPrefHeight(h-100);
         });
+        p.getChildren().addAll(menu,cmenu, listView);
+        s.setRoot(p);
+        primaryStage.setScene(s);
+        primaryStage.show();
         return s;
+    }
+
+    public static Scene setupLoggingIn() {
+        Stage other = new Stage();
+        Pane p = new Pane();
+        Scene s = new Scene(p, 250, 200);
+        other.setResizable(false);
+        other.setAlwaysOnTop(true);
+        Text txt = new Text("Logging into Discord");
+        txt.setFont(Font.font("Segoe UI", 16));
+        txt.setLayoutX(250/2 - txt.getLayoutBounds().getWidth()/2);
+        txt.setLayoutY(200/2);
+        ProgressBar bar = new ProgressBar();
+        bar.setPrefWidth(150);
+        bar.setLayoutX(250/2 - 150/2);
+        bar.setLayoutY(200/2 + 50);
+        bar.setProgress(-1);
+        p.getChildren().addAll(txt, bar);
+        other.setScene(s);
+        other.show();
+        otherStage = other;
+        return s;
+    }
+
+    public static void stopLoggingIn() {
+        otherStage.close();
     }
 
     private static Scene setupLogin() {
@@ -71,6 +139,7 @@ public class Main extends Application {
         field.setPrefWidth(200);
         orignalProperty = field.getStyle();
         field.setPromptText("Token");
+        tokenField = field;
         field.textProperty().addListener(e -> {
             if (field.getText().length() == 0) {
                 button.setDisable(true);
@@ -85,7 +154,7 @@ public class Main extends Application {
         button.setLayoutX(field.getLayoutX() + field.getPrefWidth() + 10);
 
 
-        button.setOnMouseClicked(e -> {
+        button.setOnAction(e -> {
             try {
                 DiscordHandler.connect(field.getText());
                 System.out.println("Connecting to Discord.");
