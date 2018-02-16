@@ -19,7 +19,7 @@ public class DiscordHandler {
         Main.setupLoggingIn();
         new Thread(() -> {
             try {
-                jda = new JDABuilder(AccountType.CLIENT).setToken(token).buildBlocking(JDA.Status.CONNECTING_TO_WEBSOCKET);
+                jda = new JDABuilder(AccountType.CLIENT).setToken(token).buildBlocking();
             } catch (LoginException | InterruptedException e) {
                 Platform.runLater(Main::stopLoggingIn);
                 Main.tokenField.setStyle("-fx-faint-focus-color: transparent; -fx-focus-color:rgba(255,0,0,0.7);");

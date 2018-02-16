@@ -15,6 +15,8 @@ import javafx.stage.Stage;
 import net.dv8tion.jda.client.entities.Friend;
 import net.dv8tion.jda.client.entities.RelationshipType;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class Main extends Application {
     private static Guild currentServer;
 
     public static TextField tokenField;
+    public static ListView<String> listView;
 
     @Override
     public void start(Stage primaryStage) {
@@ -65,34 +68,73 @@ public class Main extends Application {
         cmenu.setLayoutX(w-w + 170);
         cmenu.setPrefWidth(150);
         ListView<String> listView = new ListView<>();
-        listView.setPrefWidth(650);
-        listView.setPrefHeight(500);
-        listView.setLayoutY(h/2 - (listView.getPrefWidth()/2) + 80);
-        ObservableList<String> list = FXCollections.observableArrayList();
+        listView.setPrefWidth(w);
+        listView.setPrefHeight(h-130);
+        listView.setLayoutY(80);
+        ObservableList<Friend> list = FXCollections.observableArrayList();
         for (Friend usr : jda.asClient().getFriends()) {
-            list.add(usr.getUser().getName());
+            list.add(usr);
         }
-        listView.setItems(list);
+        listView.setItems(copyArrFriend(list));
+        listView.setCellFactory(lv -> {
+            ListCell<String> cell = new ListCell<>();
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem deFriend = new MenuItem("remove friend");
+            deFriend.setOnAction(e -> {
+                try {
+                    String item = cell.getItem();
+                    PrivateChannel channel = list.get(cell.getIndex()).getUser().openPrivateChannel().submit().get();
+                    list.remove(cell.getIndex());
+                    listView.setItems(copyArrFriend(list));
+                }catch (Exception de) {
+                    de.printStackTrace();
+                }
+            });
+            contextMenu.getItems().addAll(deFriend);
+            cell.textProperty().bind(cell.itemProperty());
+
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell;
+        });
         //
         s.widthProperty().addListener((observable, oldValue, newValue) -> {
             w = newValue.doubleValue();
             // add thing that need to be reposotioned here
             menu.setLayoutX(w - w + 15);
             cmenu.setLayoutX(w-w +  170);
+            listView.setPrefWidth(w);
         });
         s.heightProperty().addListener((observable, oldValue, newValue) -> {
             h = newValue.doubleValue();
             // add thing that need to be reposotioned here
             menu.setLayoutY(10);
             cmenu.setLayoutY(10);
-            //listView.setLayoutY(h/2 - (listView.getPrefWidth()/2) + 80);
-            listView.setPrefHeight(h-100);
+            listView.setPrefHeight(h-130);
         });
         p.getChildren().addAll(menu,cmenu, listView);
         s.setRoot(p);
         primaryStage.setScene(s);
         primaryStage.show();
         return s;
+    }
+
+    public static void updateListView() {
+        ObservableList<Message> list = FXCollections.observableArrayList();
+
+    }
+
+    public static ObservableList<String> copyArrFriend(ObservableList<Friend> arr) {
+        ObservableList<String> list = FXCollections.observableArrayList();
+        for (Friend fr : arr) {
+            list.add(fr.getUser().getName());
+        }
+        return list;
     }
 
     public static Scene setupLoggingIn() {
